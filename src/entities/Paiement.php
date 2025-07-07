@@ -1,105 +1,49 @@
 <?php
-
 namespace App\Entity;
 
-use App\Config\Core\AbstractEntity;
 
-class Paiement extends AbstractEntity
-{
 
+
+class Paiement extends AbstractEntity {
     private int $id;
-    private float $montant;
-    private Vendeur $vendeur;
+    private int $numero;
+    private DateTime $date;
+    private float $montantVerse;
     private Facture $facture;
-    private string $date;
-    private StatutEnum $statut;
+    private Vendeur $vendeur;
 
-    public function __construct(int $id, float $montant)
-    {
+    public function __construct(int $id, DateTime $date, float $montantVerse, Facture $facture, Vendeur $vendeur) {
         $this->id = $id;
-        $this->montant = $montant;
-    }
-
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function setId(string $id): void
-    {
-        $this->id = $id;
-    }
-
-    public function getMontant(): string
-    {
-        return $this->montant;
-    }
-
-    public function setMontant(string $montant): void
-    {
-        $this->montant = $montant;
-    }
-
-    public function getVendeur(): Vendeur
-    {
-        return $this->vendeur;
-    }
-    public function setVendeur(Vendeur $vendeur): void
-    {
+        $this->date = $date;
+        $this->montantVerse = $montantVerse;
+        $this->facture = $facture;
         $this->vendeur = $vendeur;
     }
 
-    public function getFacture(): Facture
+    public static function toObject(array $data): static
     {
-        return $this->facture;
-    }
-    public function setFacture(Facture $facture): void
-    {
-        $this->facture = $facture;
-    }
-    public function toArray(Object $object): array
-    {
-        return [
-            'id' => $this->id,
-            'montant' => $this->montant,
-            'vendeur' => $this->vendeur->toArray($object),
-            'facture' => $this->facture->toArray($object),
-        ];
-    }
-
-    public static function toObject(array $tableau): static
-    {
-        $paiement = new static(
-            $tableau['id'] ?? 0,
-            $tableau['montant'] ?? 0.0
-        );
-        if (isset($tableau['vendeur'])) {
-            $paiement->setVendeur(Vendeur::toObject($tableau['vendeur']));
-        }
-        if (isset($tableau['facture'])) {
-            $paiement->setFacture(Facture::toObject($tableau['facture']));
-        }
+        $paiement = parent::toObject($data);
+        $paiement->numero = $data['numero'] ?? 0;
+        $paiement->date = $data['date'] ?? new DateTime();
+        $paiement->montantVerse = $data['montantVerse'] ?? 0;
+        $paiement->facture = $data['facture'] ?? new Facture(0, 0, 0);
+        $paiement->vendeur = $data['vendeur'] ?? new Vendeur(0, '', '');
         return $paiement;
     }
 
-    public function getDate(): string
+    public function toArray(): array
     {
-        return $this->date;
+            $data = parent::toArray();
+            $data['numero'] = $this->numero;
+            $data['date'] = $this->date->format('Y-m-d');
+            $data['montantVerse'] = $this->montantVerse;
+            $data['facture'] = $this->facture->toArray();
+            $data['vendeur'] = $this->vendeur->toArray();
+            // $data['commandes'] =array_map(function (Commande $commande) {
+            //     return $commande->toArray();
+            // }, $this->commandes);
+        return $data;
     }
 
-    public function setDate(string $date): void
-    {
-        $this->date = $date;
-    }
 
-    public function getStatut(): StatutEnum
-    {
-        return $this->statut;
-    }
-
-    public function setStatut(StatutEnum $statut): void
-    {
-        $this->statut = $statut;
-    }
 }

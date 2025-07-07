@@ -13,8 +13,10 @@
     },
     "authors": [
         {
-            "name": "Mapathe Ndiaye"
+            "name": "Abdoulaye Diome"
         }
     ],
-    "require": {}
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
 }

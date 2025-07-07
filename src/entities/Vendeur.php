@@ -1,22 +1,19 @@
 <?php
-
 namespace App\Entity;
 
 
- class Vendeur extends Personne
-{
-
+class Vendeur extends Personne
+{        
     private string $login;
-    private string $motDePasse;
-    private ?array $commandes = null;
-    private ?array $paiements = null;
+    private string $password;
+    private array $commandes = [];
+    private array $paiement = [];
 
-    public function __construct(int $id = 0, string $nom = "", string $login = "", string $motDePasse = " ")
+    public function __construct(int $id, string $login, string $password)
     {
-        parent::__construct($id, $nom, TypeEnum::VENDEUR);
+        parent::__construct($id, '', '', TypeEnum::VENDEUR);
         $this->login = $login;
-        $this->motDePasse = $motDePasse;
-       
+        $this->password = $password;
     }
 
     public function getLogin(): string
@@ -24,62 +21,35 @@ namespace App\Entity;
         return $this->login;
     }
 
-    public function setLogin(string $login): void
+    public function getPassword(): string
     {
-        $this->login = $login;
+        return $this->password;
     }
 
-    public function getMotDePasse(): string
+    
+
+     public static function toObject(array $data): static
     {
-        return $this->motDePasse;
+        $vendeur = parent::toObject($data);
+        $vendeur->login = $data['login'] ?? '';
+        $vendeur->password = $data['password'] ?? '';
+        $vendeur->commandes = $data['commandes'] ?? [];
+        $vendeur->paiement = $data['paiement'] ?? [];
+        
+        return $vendeur;
     }
 
-    public function setMotDePasse(string $motDePasse): void
+    public function toArray(object $object): array
+    
     {
-        $this->motDePasse = $motDePasse;
-    }
-    public function getCommandes(): array
-    {
-        return $this->commandes;
-    }
-    public function addCommande(Commande $commande): void
-    {
-        $this->commandes[] = $commande;
-    }
-    public function getPaiements(): array
-    {
-        return $this->paiements;
-    }
-    public function addPaiement(Paiement $paiement): void
-    {
-        $this->paiements[] = $paiement;
+            $data = parent::toArray();
+            $data['commandes'] = array_map(function (Commande $commande) {
+                return $commande->toArray();
+            }, $this->commandes);
+        return $data;
     }
 
+    
 
-
-public static function toObject(array $row): static
-    {
-        return new static(
-            $row['id'],
-            $row['nom'],
-            $row['login'],
-            $row['motDePasse']
-        );
-    }
-
-    public function toArray(Object $object): array
-    {
-        return [
-            'id' => $this->id,
-            'login' => $this->login,
-            'motDepasse' => $this->motDePasse,
-            'nom' => $this->nom,
-            
-        ];
-    }
-    public function toJson(Object $object): string
-    {
-        return json_encode($this->toArray($object));
-    }
-
+    
 }

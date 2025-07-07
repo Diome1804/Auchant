@@ -9,6 +9,3 @@
     
 </body>
 </html>
-
-faire monter erreurController dans core 
-k

@@ -23,8 +23,8 @@
                     </svg>
                 </div>
             </div>
-            <h1 class="text-4xl font-bold text-white mb-2">Le Ndanan du code</h1>
-            <p class="text-gray-400 text-lg">Système de gestion des commandes</p>
+            <h1 class="text-4xl font-bold text-white mb-2">Auchant</h1>
+            <p class="text-gray-400 text-lg">Welcome</p>
         </div>
 
         <!-- Formulaire de connexion -->
@@ -42,7 +42,7 @@
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="/authenticate" class="space-y-6">
+            <form method="POST" action="/login" class="space-y-6">
                 <!-- Email -->
                 <div>
                     <label for="email" class="block text-gray-300 text-sm font-medium mb-2">

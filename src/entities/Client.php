@@ -2,58 +2,38 @@
 
 namespace App\Entity;
 
-class Client extends Personne
-{
 
+class Client extends Personne {
     private string $telephone;
-    private array $commandes;
-    public function __construct(int $id = 0, string $nom = "", string $telephone = "")
-    {
-        parent::__construct($id, $nom, TypeEnum::CLIENT);
-        $this->telephone = $telephone;
-        $this->commandes = [];
-    }
+    private array $commandes = [];
 
-    public function getCommandes(): array
-    {
-        return $this->commandes;
-    }
 
-    public function addCommande(Commande $commande): void
-    {
-        $this->commandes[] = $commande;
-    }
-
-    public function getTelephone()
-    {
-        return $this->telephone;
-    }
-    public function setTelephone(string $telephone)
-    {
+    public function __construct(string $telephone) {
+        parent::__construct($id, $nom, $prenom,TypeEnum::CLIENT);
         $this->telephone = $telephone;
     }
 
-    public static function toObject(array $tableau): static
+    
+    public static function toObject(array $data): static
     {
-        return new static(
-            $tableau['id'] ?? 0,
-            $tableau['nom'] ?? '',
-            $tableau['telephone'] ?? ''
-        );
+        $client = parent::toObject($data);
+        $client->commandes = $data['commandes'] ?? [];
+        $client->telephone = $data['telephone'] ?? '';
+        return $client;
     }
 
-    public function toArray(Object $object): array
+    public function toArray(object $object): array
+    
     {
-        return [
-            'id' => $this->id,
-            'nom' => $this->nom,
-            'telephone' => $this->getTelephone(),
-            'type' => $this->getType()->value,
-            'commandes' => array_map(fn(Commande $commande) => $commande->toArray($commande), $this->getCommandes())
-
-
-        ];
+            $data = parent::toArray();
+            $data['telephone'] = $this->telephone;
+            $data['commandes'] = array_map(function (Commande $commande) {
+                return $commande->toArray();
+            }, $this->commandes);
+        return $data;
     }
+    
+
 
     
 }

@@ -8,11 +8,11 @@ use App\Service\CommandeService;
 class CommandeController extends AbstractController
 {
 
-    private CommandeService $commandeService;
+    //private CommandeService $commandeService;
 
     public function __construct()
     {
-        $this->commandeService = new CommandeService();
+        //$this->commandeService = new CommandeService();
     }
 
     // public function form(){
@@ -25,8 +25,8 @@ class CommandeController extends AbstractController
 
     public function index()
     {
-        $commandes = $this->commandeService->listerCommandes();
-        $this->renderHtml('commande/list.html.php', ['commandes' => $commandes]);
+        //$commandes = $this->commandeService->listerCommandes();
+        $this->renderHtml('commande/list.html.php');
     }
     public function store() {}
     public function create()

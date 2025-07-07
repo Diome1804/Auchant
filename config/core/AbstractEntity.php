@@ -6,15 +6,13 @@ abstract class AbstractEntity
 {
 
 
-    //methode static car le resultat est un objet
-    abstract public static function toObject(array $tableau): static;
+    abstract public static function toObject(Array $tableau):static;
 
-    //methode d'instance applique sur un objet 
-    abstract public function toArray(Object $object): array;
+    
+    abstract public function toArray(Object $object):array;
 
-    //methode d'instance applique sur un objet
-    public function toJson(Object $object): string
-    {
-        return json_encode($this->toArray($object));
-    }
+    
+     public function toJson(Object $object):string{
+
+     }
 }

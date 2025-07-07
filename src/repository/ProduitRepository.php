@@ -45,6 +45,7 @@ class ProduitRepository {
             'prix' => $produit->getPrix(),
             'quantite_stock' => $produit->getQteStock()
         ]);
+        
     }
 
     // Mettre à jour un produit
