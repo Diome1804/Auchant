@@ -10,7 +10,7 @@ class Session
     
     private function __construct() 
     {
-        // Le constructeur est privé pour empêcher l'instanciation directe
+    
     }
 
    

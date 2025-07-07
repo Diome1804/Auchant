@@ -7,6 +7,7 @@ use App\Entity\Personne;
 use App\config\core;
 use App\Service\SecurityService;
 use App\core\Session;
+use App\Config\Core\Validator;
 
 class SecurityController extends AbstractController
 {
@@ -27,19 +28,67 @@ class SecurityController extends AbstractController
 
         $this->renderHtmlLogin('security/login.html.php', [
             'showNavbar' => false,
-            'title' => 'Connexion'
+            'title' => 'Connexion',
+            'errors' => [],
+            'old_input' => []
         ]);
     }
 
     public function login()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            
+            Validator::clearErrors();
+            
             $login = $_POST['email'] ?? '';
             $password = $_POST['password'] ?? '';
 
-            $vendeur = $this->securityService->seConnecter($login, $password);
+            
+            error_log("Login attempt: " . $login);
+            error_log("Password length: " . strlen($password));
 
-            if ($vendeur) {
+            
+            $loginValid = true;
+            $passwordValid = true;
+
+            
+            if (Validator::isEmpty($login, 'email')) {
+                $loginValid = false;
+                error_log("Email is empty");
+            } else {
+                
+                if (!Validator::isEmail($login)) {
+                    $loginValid = false;
+                    error_log("Email is invalid");
+                }
+            }
+
+            if (Validator::isEmpty($password, 'mot de passe')) {
+                $passwordValid = false;
+                error_log("Password is empty");
+            } else {
+                // Vérifier la longueur minimale du mot de passe
+                if (!Validator::minLength($password, 6, 'mot de passe')) {
+                    $passwordValid = false;
+                    error_log("Password too short");
+                }
+            }
+
+            
+            $errors = Validator::getErrors();
+            error_log("Validation errors: " . print_r($errors, true));
+
+            if ($loginValid && $passwordValid) {
+                $vendeur = $this->securityService->seConnecter($login, $password);
+
+                if (!$vendeur) {
+                    Validator::addError('credentials', 'Login ou mot de passe incorrect');
+                    $errors = Validator::getErrors(); // Récupérer les erreurs mises à jour
+                }
+            }
+
+            // Si tout est valide, connecter l'utilisateur
+            if (Validator::isValid() && isset($vendeur) && $vendeur) {
                 $this->session->regenerateId(true);
                 $this->session->set('user_authenticated', true);
 
@@ -92,25 +141,23 @@ class SecurityController extends AbstractController
                 header('Location: /list');
                 exit;
             } else {
-                $this->session->set('flash_error', 'Login ou mot de passe incorrect');
-
+                error_log("Rendering login with errors: " . print_r($errors, true));
+                
                 $this->renderHtmlLogin('security/login.html.php', [
                     'showNavbar' => false,
                     'title' => 'Connexion',
-                    'error' => 'Login ou mot de passe incorrect'
+                    'errors' => $errors,
+                    'old_input' => ['email' => $login]
                 ]);
+                return;
             }
         } else {
-            $errorMessage = null;
-            if ($this->session->has('flash_error')) {
-                $errorMessage = $this->session->get('flash_error');
-                $this->session->unset('flash_error');
-            }
-
+            
             $this->renderHtmlLogin('security/login.html.php', [
                 'showNavbar' => false,
                 'title' => 'Connexion',
-                'error' => $errorMessage
+                'errors' => [],
+                'old_input' => []
             ]);
         }
     }

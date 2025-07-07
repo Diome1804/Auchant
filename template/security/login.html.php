@@ -31,13 +31,47 @@
         <div class="bg-[#151f11] rounded-xl shadow-2xl p-8 border border-[#263a1d] backdrop-blur-sm">
             <h2 class="text-2xl font-bold text-white mb-6 text-center">Connexion</h2>
             
-            <?php if (isset($error)): ?>
+            <!-- Test d'affichage forcé des erreurs -->
+            <?php 
+            // Debug : Vérifier si les variables existent
+            $hasErrors = isset($errors) && is_array($errors) && !empty($errors);
+            $hasError = isset($error) && !empty($error);
+            ?>
+            
+            <!-- Affichage des erreurs multiples -->
+            <?php if ($hasErrors): ?>
+                <div class="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-6 animate-pulse">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <?php foreach ($errors as $key => $errorMsg): ?>
+                                <div class="mb-1 last:mb-0"><?= htmlspecialchars($errorMsg) ?></div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Affichage de l'erreur simple -->
+            <?php if ($hasError): ?>
                 <div class="bg-red-900/50 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-6 animate-pulse">
                     <div class="flex items-center">
                         <svg class="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                         </svg>
                         <span><?= htmlspecialchars($error) ?></span>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Si aucune erreur n'est détectée, affichons un message de debug -->
+            <?php if (!$hasErrors && !$hasError && $_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+                <div class="bg-yellow-900/50 border border-yellow-500 text-yellow-200 px-4 py-3 rounded-lg mb-6">
+                    <div class="text-sm">
+                        Debug: Aucune erreur détectée dans le template<br>
+                        Variables disponibles: <?= implode(', ', array_keys(get_defined_vars())) ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -58,7 +92,7 @@
                         required
                         class="w-full bg-[#0f1a0a] border border-[#263a1d] rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-400/50 transition duration-200"
                         placeholder="admin@ndanan.com"
-                        value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                        value="<?= htmlspecialchars($old_input['email'] ?? $_POST['email'] ?? '') ?>"
                     >
                 </div>
 
