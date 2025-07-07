@@ -28,10 +28,10 @@ abstract class AbstractController
         require_once '../template/layout/base.layout.php';
     }
 
-    // Corrigez cette méthode pour accepter les paramètres
+    
     protected function renderHtmlLogin(String $view, array $params = [])
     {
-        extract($params); // Extrait les variables du tableau $params
+        extract($params);
         require_once '../template/' . $view;
     }
 }
