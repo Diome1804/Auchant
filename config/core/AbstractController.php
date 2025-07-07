@@ -1,9 +1,19 @@
 <?php
 
 namespace App\Config\Core;
+use App\core\Session;
 
 abstract class AbstractController
 {
+
+    // protected Session $session;
+
+
+    // public function __construct(){
+    //     $this->session = Session::getInstance();
+    // }
+
+
     abstract public function index();
 
     abstract public function store();

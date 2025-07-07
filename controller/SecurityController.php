@@ -15,7 +15,7 @@ class SecurityController extends AbstractController
     private Session $session;
 
     public function __construct(){
-        $this->securityService = new SecurityService();
+        $this->securityService = SecurityService::getInstance();
         $this->session = Session::getInstance();
     }
 
@@ -141,13 +141,11 @@ class SecurityController extends AbstractController
                 header('Location: /list');
                 exit;
             } else {
-                error_log("Rendering login with errors: " . print_r($errors, true));
-                
+                $errors = Validator::getErrors();
+                //error_log("Rendering login with errors: " . print_r($errors, true));
                 $this->renderHtmlLogin('security/login.html.php', [
                     'showNavbar' => false,
-                    'title' => 'Connexion',
                     'errors' => $errors,
-                    'old_input' => ['email' => $login]
                 ]);
                 return;
             }
@@ -164,7 +162,7 @@ class SecurityController extends AbstractController
 
     public function logout()
     {
-        $this->session->set('flash_info', 'Vous avez été déconnecté avec succès.');
+        //$this->session->set('flash_info', 'Vous avez été déconnecté avec succès.');
         $this->session->unset('user_authenticated');
         $this->session->unset('user_id');
         $this->session->unset('user_email');

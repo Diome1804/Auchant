@@ -15,7 +15,7 @@
 <body class="min-h-screen flex items-center justify-center p-4">
     <div class="w-full max-w-md">
         <!-- Logo/Titre -->
-        <div class="text-center mb-8">
+        <!-- <div class="text-center mb-8">
             <div class="mb-4">
                 <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-lime-400 mb-4">
                     <svg class="w-8 h-8 text-[#0f1a0a]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@
             </div>
             <h1 class="text-4xl font-bold text-white mb-2">Auchant</h1>
             <p class="text-gray-400 text-lg">Welcome</p>
-        </div>
+        </div> -->
 
         <!-- Formulaire de connexion -->
         <div class="bg-[#151f11] rounded-xl shadow-2xl p-8 border border-[#263a1d] backdrop-blur-sm">
@@ -89,9 +89,9 @@
                         type="email" 
                         id="email" 
                         name="email" 
-                        required
+                        //required
                         class="w-full bg-[#0f1a0a] border border-[#263a1d] rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-400/50 transition duration-200"
-                        placeholder="admin@ndanan.com"
+                        placeholder="login"
                         value="<?= htmlspecialchars($old_input['email'] ?? $_POST['email'] ?? '') ?>"
                     >
                 </div>
@@ -110,7 +110,7 @@
                         name="password" 
                         required
                         class="w-full bg-[#0f1a0a] border border-[#263a1d] rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-2 focus:ring-lime-400/50 transition duration-200"
-                        placeholder="••••••••"
+                        placeholder="password"
                     >
                 </div>
 
@@ -145,7 +145,7 @@
             </form>
 
             <!-- Informations de test -->
-            <div class="mt-6 p-4 bg-[#0f1a0a] rounded-lg border border-[#263a1d]">
+            <!-- <div class="mt-6 p-4 bg-[#0f1a0a] rounded-lg border border-[#263a1d]">
                 <div class="flex items-center mb-2">
                     <svg class="w-4 h-4 text-lime-400 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -161,7 +161,7 @@
                     </p>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Footer -->
         <div class="text-center mt-8">

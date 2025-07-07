@@ -9,10 +9,28 @@ use App\Config\Core\AbstractRepository;
 
 class PersonneRepository extends AbstractRepository{
 
-    protected  \PDO $pdo;
+    protected \PDO $pdo;
 
-    public function __construct() {
+    private static ?PersonneRepository $instance = null;
+
+    private function __construct() {
         $this->pdo = Database::getConnection();
+    }
+
+    public static function getInstance(): PersonneRepository
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    // Empêcher le clonage
+    private function __clone() {}
+
+    // Empêcher la désérialisation
+    public function __wakeup() {
+        throw new \Exception("Cannot unserialize singleton");
     }
     
     public function getTableName(): string
@@ -20,8 +38,7 @@ class PersonneRepository extends AbstractRepository{
         return 'personne';
     }
 
-
- public function selectByLoginAndPassword(string $login, string $password): ?Vendeur
+    public function selectByLoginAndPassword(string $login, string $password): ?Vendeur
     {
         $stmt = $this->pdo->prepare("SELECT * FROM personne WHERE login = :login AND password = :password ");
         $stmt->execute(['login' => $login, 'password' => $password]);
@@ -35,11 +52,11 @@ class PersonneRepository extends AbstractRepository{
             if ($row['type'] === 'Vendeur') {
                 return Vendeur::toObject($row);
             }
-            
         }
 
         return null;
     }
+
     /**
      * Trouve les personnes par nom
      */
@@ -55,6 +72,7 @@ class PersonneRepository extends AbstractRepository{
             throw new \Exception("Erreur lors de la recherche par nom : " . $e->getMessage());
         }
     }
+
     /**
      * Trouve les personnes par prénom
      */
@@ -138,6 +156,7 @@ class PersonneRepository extends AbstractRepository{
             throw new \Exception("Erreur lors de la recherche par tranche d'âge : " . $e->getMessage());
         }
     }
+
     public function emailExists(string $email, ?int $excludeId = null): bool
     {
         try {
@@ -219,6 +238,4 @@ class PersonneRepository extends AbstractRepository{
             throw new \Exception("Erreur lors de la pagination : " . $e->getMessage());
         }
     }
-
 }
-
