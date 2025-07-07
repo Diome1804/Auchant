@@ -6,72 +6,170 @@ use App\Config\Core\AbstractController;
 use App\Entity\Personne;
 use App\config\core;
 use App\Service\SecurityService;
+use App\core\Session;
 
 class SecurityController extends AbstractController
-
-    
-    
-    
 {
     private SecurityService $securityService;
+    private Session $session;
 
     public function __construct(){
         $this->securityService = new SecurityService();
+        $this->session = Session::getInstance();
     }
 
     public function index()
     {
+        if ($this->session->has('user_authenticated') && $this->session->get('user_authenticated') === true) {
+            header('Location: /list');
+            exit;
+        }
+
         $this->renderHtmlLogin('security/login.html.php', [
             'showNavbar' => false,
             'title' => 'Connexion'
         ]);
     }
 
-
     public function login()
-{
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $login = $_POST['email'] ?? '';
-        $password = $_POST['password'] ?? '';
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $login = $_POST['email'] ?? '';
+            $password = $_POST['password'] ?? '';
 
-        $vendeur = $this->securityService->seConnecter($login, $password);
+            $vendeur = $this->securityService->seConnecter($login, $password);
 
-        if ($vendeur) {
-            // Générer un token (ici simplifié avec uniqid)
-            $token = uniqid('token_', true);
+            if ($vendeur) {
+                $this->session->regenerateId(true);
+                $this->session->set('user_authenticated', true);
 
-            // Stocker ce token dans un cookie (durée 1 heure)
-            setcookie('auth_token', $token, time() + 3600, '/');
+                if (method_exists($vendeur, 'getId')) {
+                    $this->session->set('user_id', $vendeur->getId());
+                }
 
-            // Optionnel : associer ce token à l'utilisateur si besoin dans un tableau statique ou fichier
+                if (method_exists($vendeur, 'getEmail')) {
+                    $this->session->set('user_email', $vendeur->getEmail());
+                } elseif (method_exists($vendeur, 'getLogin')) {
+                    $this->session->set('user_email', $vendeur->getLogin());
+                } elseif (method_exists($vendeur, 'getMail')) {
+                    $this->session->set('user_email', $vendeur->getMail());
+                } else {
+                    $this->session->set('user_email', $login);
+                }
 
-            header('Location: /list');
-            exit;
+                if (method_exists($vendeur, 'getNom')) {
+                    $this->session->set('user_nom', $vendeur->getNom());
+                }
+
+                if (method_exists($vendeur, 'getPrenom')) {
+                    $this->session->set('user_prenom', $vendeur->getPrenom());
+                }
+
+                $this->session->set('user_login_time', time());
+
+                $userData = ['login' => $login];
+
+                if (method_exists($vendeur, 'getId')) {
+                    $userData['id'] = $vendeur->getId();
+                }
+                if (method_exists($vendeur, 'getNom')) {
+                    $userData['nom'] = $vendeur->getNom();
+                }
+                if (method_exists($vendeur, 'getPrenom')) {
+                    $userData['prenom'] = $vendeur->getPrenom();
+                }
+                if (method_exists($vendeur, 'getEmail')) {
+                    $userData['email'] = $vendeur->getEmail();
+                } elseif (method_exists($vendeur, 'getLogin')) {
+                    $userData['email'] = $vendeur->getLogin();
+                } elseif (method_exists($vendeur, 'getMail')) {
+                    $userData['email'] = $vendeur->getMail();
+                }
+
+                $this->session->set('user_data', $userData);
+                $this->session->set('flash_success', 'Connexion réussie !');
+
+                header('Location: /list');
+                exit;
+            } else {
+                $this->session->set('flash_error', 'Login ou mot de passe incorrect');
+
+                $this->renderHtmlLogin('security/login.html.php', [
+                    'showNavbar' => false,
+                    'title' => 'Connexion',
+                    'error' => 'Login ou mot de passe incorrect'
+                ]);
+            }
         } else {
+            $errorMessage = null;
+            if ($this->session->has('flash_error')) {
+                $errorMessage = $this->session->get('flash_error');
+                $this->session->unset('flash_error');
+            }
+
             $this->renderHtmlLogin('security/login.html.php', [
                 'showNavbar' => false,
                 'title' => 'Connexion',
-                'error' => 'Login ou mot de passe incorrect'
+                'error' => $errorMessage
             ]);
         }
-    } else {
-        $this->renderHtmlLogin('security/login.html.php', [
-            'showNavbar' => false,
-            'title' => 'Connexion',
-            'error' => null
-        ]);
     }
-}
-
 
     public function logout()
     {
-        // Supprimer le cookie auth_token
-    setcookie('auth_token', '', time() - 3600, '/');
+        $this->session->set('flash_info', 'Vous avez été déconnecté avec succès.');
+        $this->session->unset('user_authenticated');
+        $this->session->unset('user_id');
+        $this->session->unset('user_email');
+        $this->session->unset('user_nom');
+        $this->session->unset('user_prenom');
+        $this->session->unset('user_login_time');
+        $this->session->unset('user_data');
+        $this->session->regenerateId(true);
 
-    // Rediriger vers la page de login
-    header('Location: /login');
-    exit;
+        header('Location: /login');
+        exit;
+    }
+
+    public function isAuthenticated(): bool
+    {
+        return $this->session->has('user_authenticated') && 
+               $this->session->get('user_authenticated') === true;
+    }
+
+    public function getCurrentUser(): ?array
+    {
+        if ($this->isAuthenticated()) {
+            return $this->session->get('user_data');
+        }
+        return null;
+    }
+
+    public function getCurrentUserId(): ?int
+    {
+        if ($this->isAuthenticated()) {
+            return $this->session->get('user_id');
+        }
+        return null;
+    }
+
+    public function isSessionExpired(int $maxLifetime = 3600): bool
+    {
+        if (!$this->session->has('user_login_time')) {
+            return true;
+        }
+
+        $loginTime = $this->session->get('user_login_time');
+        return (time() - $loginTime) > $maxLifetime;
+    }
+
+    public function requireAuth(): void
+    {
+        if (!$this->isAuthenticated() || $this->isSessionExpired()) {
+            $this->session->set('flash_warning', 'Vous devez être connecté pour accéder à cette page.');
+            header('Location: /login');
+            exit;
+        }
     }
 
     public function store() {}
